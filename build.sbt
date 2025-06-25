@@ -10,17 +10,16 @@ lazy val root = (project in file("."))
       // Determine OS version of JavaFX binaries
       val osName = System.getProperty("os.name") match {
         case n if n.startsWith("Linux")   => "linux"
-        case n if n.startsWith("Mac")     =>
-          val arch = System.getProperty("os.arch")
-          if (arch == "aarch64" || arch == "arm64") "mac-aarch64" else "mac"
+        case n if n.startsWith("Mac")     => "mac"
         case n if n.startsWith("Windows") => "win"
         case _                            => throw new Exception("Unknown platform!")
       }
       Seq("base", "controls", "fxml", "graphics", "media", "swing", "web")
-        .map(m => "org.openjfx" % s"javafx-$m" % "21.0.4" classifier osName)
+        .map(m => "org.openjfx" % s"javafx-$m" % "23.0.2" classifier osName)
     },
-    libraryDependencies ++= Seq("org.scalafx" %% "scalafx" % "21.0.0-R32")
+    libraryDependencies ++= Seq("org.scalafx" %% "scalafx" % "23.0.1-R34")
   )
+
 //enable for sbt-assembly
 //assembly / assemblyMergeStrategy := {
 //  case PathList("META-INF", xs @ _*) => MergeStrategy.discard // Discard all META-INF files
