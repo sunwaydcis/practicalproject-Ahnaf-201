@@ -2,9 +2,15 @@ package ch.makery.address.view
 
 import ch.makery.address.model.Person
 import ch.makery.address.MainApp
+import ch.makery.address.util.DateUtil.*
+import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.{Label, TableColumn, TableView, TextField}
 import scalafx.Includes.*
+import scalafx.beans.binding.Bindings
+import scalafx.scene.control.Alert
+import scalafx.scene.control.Alert.AlertType
+import scalafx.scene.control.Alert.AlertType.Information
 @FXML
 class PersonOverviewController():
   @FXML
@@ -33,4 +39,44 @@ class PersonOverviewController():
     // initialize columns's cell values
     firstNameColumn.cellValueFactory = {_.value.firstName}
     lastNameColumn.cellValueFactory  = {_.value.lastName}
-    firstNameLabel.text <== myText.text
+    //firstNameLabel.text <== myText.text
+    showPersonDetails(None)
+
+    personTable.selectionModel().selectedItem.onChange((_,_,newValue) => showPersonDetails(Option(newValue)))
+
+  private def showPersonDetails(person: Option[Person]): Unit =
+    person match {
+      case Some(person) =>
+        firstNameLabel.text <== person.firstName
+        lastNameLabel.text <== person.lastName
+        streetLabel.text <== person.street
+        cityLabel.text <== person.city
+        postalCodeLabel.text <== person.postalCode.delegate.asString()
+        birthdayLabel.text <== Bindings.createStringBinding(() => {person.date.value.asString}, person.date)
+
+      case None =>
+        firstNameLabel.text.unbind()
+        lastNameLabel.text.unbind()
+        streetLabel.text.unbind()
+        cityLabel.text.unbind()
+        postalCodeLabel.text.unbind()
+        birthdayLabel.text.unbind()
+
+        firstNameLabel.text = ""
+        lastNameLabel.text = ""
+        streetLabel.text = ""
+        cityLabel.text = ""
+        postalCodeLabel.text = ""
+        birthdayLabel.text = ""
+    }
+  def handleDeletePerson(action: ActionEvent): Unit =
+    val selectedIndex = personTable.selectionModel().selectedIndex.value
+    if (selectedIndex >= 0) then
+      MainApp.personData.remove(selectedIndex)
+    else
+      val alert = new Alert(Information):
+        initOwner(MainApp.stage)
+        title = "No Selection"
+        headerText = "No Person Selected"
+        contentText = "Please select a person in the table"
+      .showAndWait()
