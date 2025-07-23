@@ -72,7 +72,7 @@ class PersonOverviewController():
   def handleDeletePerson(action: ActionEvent): Unit =
     val selectedIndex = personTable.selectionModel().selectedIndex.value
     if (selectedIndex >= 0) then
-      MainApp.personData.remove(selectedIndex)
+      MainApp.personData.remove(selectedIndex).delete()
     else
       val alert = new Alert(Information):
         initOwner(MainApp.stage)
@@ -84,21 +84,25 @@ class PersonOverviewController():
   def handleNewPerson(action: ActionEvent) =
     val person = new Person("", "")
     val okClicked = MainApp.showPersonEditDialog(person);
-    if (okClicked) then
+    if (okClicked) then {
       MainApp.personData += person
+      person.save()
+    }
 
   def handleEditPerson(action: ActionEvent) =
     val selectedPerson = personTable.selectionModel().selectedItem.value
     if (selectedPerson != null) then
       val okClicked = MainApp.showPersonEditDialog(selectedPerson)
 
-      if (okClicked) then showPersonDetails(Some(selectedPerson))
+      if (okClicked) then { 
+        showPersonDetails(Some(selectedPerson))
+        selectedPerson.save()
 
-    else
-      // Nothing selected.
-      val alert = new Alert(Alert.AlertType.Warning):
-        initOwner(MainApp.stage)
-        title = "No Selection"
-        headerText = "No Person Selected"
-        contentText = "Please select a person in the table."
-      .showAndWait()
+      } else
+        // Nothing selected.
+        val alert = new Alert(Alert.AlertType.Warning):
+          initOwner(MainApp.stage)
+          title = "No Selection"
+          headerText = "No Person Selected"
+          contentText = "Please select a person in the table."
+        .showAndWait()
